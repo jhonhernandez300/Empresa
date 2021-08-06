@@ -61,3 +61,4 @@ C:\Users\PC\source\repos\Empresa\obj\Debug\netcoreapp3.1\Empresa.csproj.CopyComp
 C:\Users\PC\source\repos\Empresa\obj\Debug\netcoreapp3.1\Empresa.dll
 C:\Users\PC\source\repos\Empresa\obj\Debug\netcoreapp3.1\Empresa.pdb
 C:\Users\PC\source\repos\Empresa\obj\Debug\netcoreapp3.1\Empresa.genruntimeconfig.cache
+C:\Users\PC\source\repos\Empresa\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.JsonPatch.dll

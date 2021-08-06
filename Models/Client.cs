@@ -25,7 +25,7 @@ namespace Empresa.Models
 
         [Required(ErrorMessage = "Documento de identidad requeridos")]
         [DataType(DataType.Text, ErrorMessage = "El documento de identidad debe ser un número")]
-        //[Range(1, 15, ErrorMessage = "Debe ser un número con longitud entre {1} y {2}")]
+        [Range(2, 15, ErrorMessage = "Debe ser un número con longitud entre {1} y {2}")]
         public int IdentityDocument { get; set; }
                 
         [DataType(DataType.Date, ErrorMessage = "La fecha de nacimiento debe ser una fecha")]

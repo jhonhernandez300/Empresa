@@ -11,6 +11,7 @@ using System.Globalization;
 using Newtonsoft.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Empresa.Controllers
 {
@@ -26,70 +27,152 @@ namespace Empresa.Controllers
         }
 
         [HttpGet("GetAllClients")]
-        public IEnumerable<Client> GetAllClients()
+        public IActionResult GetAllClients()
         {
-            return _context.Clients.ToList();
+            try
+            {
+                var clients = _context.Clients.ToList();
+                return Ok(clients);
+            }
+            catch (Exception e)
+            {
+                Console.Write("Error info:" + e.Message);
+                return BadRequest("Error interno del servidor");
+            }
         }
 
-        [HttpGet("{id}", Name = "clientFounded")]
-        public IActionResult GetById(int id)
+        [HttpGet("GetClientById/{id}", Name = "clientFounded")]
+        public IActionResult GetClientById(int id)
         {
-            var client = _context.Clients.FirstOrDefault(x => x.Id == id);
+            try
+            {
+                var client = _context.Clients.FirstOrDefault(x => x.Id == id);
 
+                if (client == null)
+                {
+                    return NotFound();
+                }
+                return Ok(client);
+            }
+            catch (Exception e)
+            {
+                Console.Write("Error info:" + e.Message);
+                return BadRequest("Error interno del servidor");
+            }
+        }
+
+        // POST: api/Client/SaveClient
+        [HttpPost("SaveClient")]
+        public async Task<ActionResult<Client>> SavePost([FromBody] Client client)
+        {
             if (client == null)
             {
                 return NotFound();
             }
 
+            try
+            {
+                _context.Clients.Add(client);
+                await _context.SaveChangesAsync();
+                return Ok(client);
+            }
+            catch (Exception e)
+            {
+                Console.Write("Error info:" + e.Message);
+                return BadRequest("Error interno del servidor");
+            }
+        }
+
+        // POST: api/Client/UpdateClient
+        [HttpPatch("UpdateClient")]
+        public async Task<ActionResult<Client>> UpdateClient([FromBody] Client client)
+        {
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
             return Ok(client);
         }
 
-        // POST: api/PostServicio        
-        //[HttpPost("PostClient")]
-        [HttpPost]
-        //public IActionResult Post([FromBody] Client client)
-        public async Task<ActionResult<Client>> Post([FromBody] Client client)
+        [HttpPatch("UpdateClient3/{id}")]
+        public IActionResult Patch(int id, [FromBody] Client clientPatch)
         {
-            //if (ModelState.IsValid)
-            //{
-                //Client theClient = JsonConvert.DeserializeObject<Client>(jsonOutPut);                                
-                
+            if (clientPatch != null)
+            {
+                var client = _context.Clients.FirstOrDefault(x => x.Id == id);
 
-                _context.Clients.Add(client);
-            //_context.SaveChanges();
-            await _context.SaveChangesAsync();
-            //return new CreatedAtRouteResult("clientCreated", new { id = client.Id }, client);
-
-            //}
-            //return BadRequest(ModelState);
-            return client;
+                if (client != null)
+                {
+                    client.IdentityDocument = clientPatch.IdentityDocument;
+                    _context.SaveChanges();
+                    //return Ok(clientPatch);
+                    return Ok(client);
+                }
+            }
+            return BadRequest();
         }
 
-        //public async Task<ActionResult<Servicio>> IngresarServicioALaBaseDeDatos(Servicio servicio)
-        //{
-        //    _context.Servicio.Add(servicio);
-        //    await _context.SaveChangesAsync();
+        [HttpPatch("UpdateClient2/{id}")]
+        public IActionResult Patch(int id, [FromBody] JsonPatchDocument<Client> clientPatch)
+        {
+            if (clientPatch != null)
+            {
+                var client = _context.Clients.FirstOrDefault(x => x.Id == id);
 
-        //    return servicio;
-        //}
+                if (client != null)
+                {
+                    clientPatch.ApplyTo(client);
+                    return Ok(clientPatch);
+                }
+            }
+            return BadRequest();
+        }
 
+        [HttpPut("UpdateClient/{id}")]
+        public IActionResult UpdateClient(int id, [FromBody] Client newClient)
+        {
+            if (newClient != null)
+            {
+                try
+                {
+                    var oldClient = _context.Clients.FirstOrDefault(x => x.Id == id);
 
-        //// GET: api/GetServicio/5        
-        //[HttpGet("GetServicio/{tecnico}/{semanaDelAno}")]
-        //public async Task<IActionResult> GetServicio(string tecnico, int semanaDelAno)
-        //{
-        //    var servicio = await _context.Servicio.Where(i => i.tecnico == tecnico && i.semanaDelAno == semanaDelAno).ToListAsync();
+                    if (oldClient != null)
+                    {
+                        _context.Clients.Update(newClient);
+                        _context.SaveChanges();
+                        return Ok(newClient);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.Write("Error info:" + e.Message);
+                }
+            }
+            return BadRequest();
+        }
 
-        //    if (servicio.Count == 0)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpPut("DeleteClient/{id}")]
+        public IActionResult DeleteClient(int id)
+        {
+            try
+            {
+                var client = _context.Clients.FirstOrDefault(x => x.Id == id);
 
-        //    return Ok(servicio);
-        //}
+                if (client != null)
+                {
+                    client.Active = false;
+                    _context.Clients.Update(client);
+                    _context.SaveChanges();
+                    return Ok(client);
 
-        
-
+                }
+                return BadRequest();
+            }
+            catch (Exception e)
+            {
+                Console.Write("Error info:" + e.Message);
+                return BadRequest("Error interno del servidor");
+            }
+        }
 
     }
 }
