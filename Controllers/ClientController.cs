@@ -60,6 +60,26 @@ namespace Empresa.Controllers
                 return BadRequest("Error interno del servidor");
             }
         }
+        
+        public string AlreadyExistsIdentityDocument(int identityDocument)
+        {
+            try
+            {                
+                if (_context.Clients.FirstOrDefault(x => x.IdentityDocument == identityDocument) != null)
+                {
+                    return "yes";
+                }
+                else {
+                    return "no";
+                }
+                
+            }
+            catch (Exception e)
+            {
+                Console.Write("Error info:" + e.Message);
+                return "Error interno del servidor";
+            }
+        }
 
         // POST: api/Client/SaveClient
         [HttpPost("SaveClient")]
@@ -68,6 +88,11 @@ namespace Empresa.Controllers
             if (client == null)
             {
                 return NotFound();
+            }
+
+            if (AlreadyExistsIdentityDocument(client.IdentityDocument) == "yes")
+            {                
+                return BadRequest("Ese documento de identificación ya existe");
             }
 
             try
